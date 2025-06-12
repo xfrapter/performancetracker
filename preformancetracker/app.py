@@ -35,12 +35,13 @@ class PerformanceTrackerApp(toga.App):
         logger.info('App startup')
         # Initialize views
         self.views = {
-            'home': home_view.create(self),
+            'home': home_view.create_home_view(self),
             'add_record': add_record_view.create(self),
             'records': records_view.create(self),
             'stats': stats_view.create(self),
             'start_shift': start_shift_view.create(self),
-            'finish_shift': finish_shift_view.create(self)
+            'finish_shift': finish_shift_view.create(self),
+            'debug': self.create_debug_view()
         }
         
         # Set initial view
@@ -55,7 +56,7 @@ class PerformanceTrackerApp(toga.App):
         logger.info(f'Switching to view: {view_name}')
         self.main_container.clear()
         view_creators = {
-            "home": home_view.create,
+            "home": home_view.create_home_view,
             "add_record": add_record_view.create,
             "edit_record": add_record_view.create,
             "view_records": records_view.create,
@@ -64,7 +65,7 @@ class PerformanceTrackerApp(toga.App):
             "finish_shift": finish_shift_view.create,
             "debug": self.create_debug_view,
         }
-        creator = view_creators.get(view_name, home_view.create)
+        creator = view_creators.get(view_name, home_view.create_home_view)
         view_content = creator(self, **kwargs) if view_name != 'debug' else creator()
         self.main_container.add(view_content)
 
@@ -74,6 +75,8 @@ class PerformanceTrackerApp(toga.App):
         logs = get_recent_logs(50)
         for ts, msg in logs:
             box.add(toga.Label(f"{ts.strftime('%H:%M:%S')} {msg}", style=Pack(font_size=12)))
+        back_button = toga.Button('Back to Home', on_press=lambda w: self.set_view('home'))
+        box.add(back_button)
         return box
 
     async def save_record_async(self):

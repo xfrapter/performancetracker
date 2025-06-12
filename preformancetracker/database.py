@@ -1,6 +1,7 @@
 import sqlite3
 import os
 from datetime import datetime, timedelta
+from contextlib import contextmanager
 from .debug import logger
 
 class Database:
@@ -10,9 +11,14 @@ class Database:
         self._ensure_db_exists()
         logger.info('Database initialized')
 
+    @contextmanager
     def _get_connection(self):
-        """Get a new database connection."""
-        return sqlite3.connect(self.db_path)
+        """Get a database connection using a context manager."""
+        conn = sqlite3.connect(self.db_path)
+        try:
+            yield conn
+        finally:
+            conn.close()
 
     def _ensure_db_exists(self):
         """Ensure the database and its tables exist."""
